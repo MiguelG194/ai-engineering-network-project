@@ -1,0 +1,420 @@
+
+[
+  {
+    "id": "NET-001",
+    "category": "network_inspection",
+    "input": "Show me the network interfaces on this server.",
+    "expected_behavior": [
+      "Uses ip link show",
+      "Identifies available network interfaces",
+      "Reports interface states",
+      "Does not invent interfaces"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "interface names",
+        "interface states"
+      ],
+      "must_not": [
+        "invented interface information"
+      ]
+    }
+  },
+  {
+    "id": "NET-002",
+    "category": "network_inspection",
+    "input": "What IP address is assigned to this machine?",
+    "expected_behavior": [
+      "Uses ip addr show",
+      "Identifies assigned IPv4 addresses",
+      "Identifies the interfaces associated with those addresses",
+      "Does not confuse loopback with the primary network address"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "IP addresses",
+        "associated interface names"
+      ],
+      "must_not": [
+        "invented IP addresses",
+        "confusing 127.0.0.1 with the machine's network IP"
+      ]
+    }
+  },
+  {
+    "id": "NET-003",
+    "category": "network_inspection",
+    "input": "Is my network interface active?",
+    "expected_behavior": [
+      "Inspects interfaces using ip link show",
+      "Identifies the requested interface if specified",
+      "Explains the difference between UP and DOWN states",
+      "Asks which interface if the request is ambiguous"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "interface state",
+        "explanation of the observed state"
+      ],
+      "must_not": [
+        "assuming an interface is active without checking"
+      ]
+    }
+  },
+  {
+    "id": "NET-004",
+    "category": "network_inspection",
+    "input": "What is the MAC address of eth0?",
+    "expected_behavior": [
+      "Inspects eth0 using ip link show eth0",
+      "Identifies the link/ether address",
+      "Distinguishes the MAC address from the IP address",
+      "Reports if eth0 does not exist"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "MAC address or an explicit error if unavailable"
+      ],
+      "must_not": [
+        "reporting an IP address as a MAC address",
+        "inventing a MAC address"
+      ]
+    }
+  },
+  {
+    "id": "NET-005",
+    "category": "connectivity",
+    "input": "Server A cannot ping Server B. Help me troubleshoot the problem.",
+    "expected_behavior": [
+      "Checks interface states on both servers",
+      "Inspects IP addresses and subnet masks",
+      "Checks bridge membership",
+      "Recommends ping and ip neigh show for further diagnosis",
+      "Does not assume a single cause without evidence"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "interface inspection",
+        "IP configuration inspection",
+        "bridge inspection",
+        "a request for additional diagnostic information if necessary"
+      ],
+      "must_not": [
+        "unsupported diagnosis",
+        "assuming the problem is DNS"
+      ]
+    }
+  },
+  {
+    "id": "NET-006",
+    "category": "connectivity",
+    "input": "Server A can ping itself but cannot ping Server B. What could be wrong?",
+    "expected_behavior": [
+      "Explains that successful local ping does not guarantee connectivity to another server",
+      "Checks Server A and Server B IP configurations",
+      "Checks whether both servers are connected to the same Layer 2 network",
+      "Investigates bridge membership and interface states"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "IP configuration checks",
+        "bridge or network connectivity checks"
+      ],
+      "must_not": [
+        "claiming that successful local ping proves network connectivity"
+      ]
+    }
+  },
+  {
+    "id": "NET-007",
+    "category": "connectivity",
+    "input": "My network interface is DOWN. How do I fix it?",
+    "expected_behavior": [
+      "Identifies the affected interface",
+      "Explains that an interface can be administratively down or lack carrier",
+      "Recommends ip link set INTERFACE up when appropriate",
+      "Mentions that administrative changes may require sudo",
+      "Verifies the resulting interface state"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "ip link set command",
+        "verification using ip link show"
+      ],
+      "must_not": [
+        "assuming that bringing the interface up guarantees connectivity",
+        "using an unspecified interface name as a confirmed target"
+      ]
+    }
+  },
+  {
+    "id": "NET-008",
+    "category": "connectivity",
+    "input": "Both servers have IP addresses, but they cannot communicate. What should I check?",
+    "expected_behavior": [
+      "Checks whether the IP addresses belong to compatible subnets",
+      "Checks interface states",
+      "Checks bridge membership",
+      "Investigates neighbor discovery using ip neigh show",
+      "Considers filtering as a possible cause without assuming it"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "subnet compatibility",
+        "interface states",
+        "bridge membership"
+      ],
+      "must_not": [
+        "assuming that having IP addresses guarantees connectivity"
+      ]
+    }
+  },
+  {
+    "id": "NET-009",
+    "category": "bridge",
+    "input": "How do I check whether eth0 is connected to br0?",
+    "expected_behavior": [
+      "Uses bridge link or ip link show master br0",
+      "Identifies whether eth0 is a bridge port",
+      "Explains the relationship between eth0 and br0"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "bridge link or equivalent command",
+        "bridge membership result"
+      ],
+      "must_not": [
+        "assuming eth0 belongs to br0 without checking"
+      ]
+    }
+  },
+  {
+    "id": "NET-010",
+    "category": "bridge",
+    "input": "My bridge exists, but the two servers cannot communicate. Help me investigate.",
+    "expected_behavior": [
+      "Inspects the bridge using ip link show",
+      "Checks bridge ports using bridge link",
+      "Checks interface states",
+      "Checks IP configuration on both servers",
+      "Investigates bridge forwarding and neighbor information where appropriate"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "bridge inspection",
+        "bridge port inspection",
+        "IP configuration inspection"
+      ],
+      "must_not": [
+        "assuming that bridge existence guarantees correct forwarding"
+      ]
+    }
+  },
+  {
+    "id": "NET-011",
+    "category": "bridge",
+    "input": "How do I see which interfaces belong to my bridge?",
+    "expected_behavior": [
+      "Uses bridge link show",
+      "Identifies interfaces attached to the bridge",
+      "Explains the bridge master relationship"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "bridge link show or equivalent",
+        "attached interface names"
+      ],
+      "must_not": [
+        "invented bridge ports"
+      ]
+    }
+  },
+  {
+    "id": "NET-012",
+    "category": "bridge",
+    "input": "What is the difference between a Linux bridge and a network interface?",
+    "expected_behavior": [
+      "Explains that a Linux bridge forwards Layer 2 Ethernet frames between attached ports",
+      "Explains that a network interface provides a network attachment",
+      "Distinguishes a bridge device from its physical or virtual ports",
+      "Provides a relevant example using br0 and eth0"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "Layer 2 forwarding explanation",
+        "bridge and port distinction"
+      ],
+      "must_not": [
+        "describing a Linux bridge as a Layer 3 router"
+      ]
+    }
+  },
+  {
+    "id": "NET-013",
+    "category": "configuration",
+    "input": "How do I assign 192.168.10.10/24 to eth0?",
+    "expected_behavior": [
+      "Provides the appropriate ip addr add command",
+      "Explains the purpose of the /24 prefix",
+      "Mentions that the configuration is temporary",
+      "Verifies the address using ip addr show eth0",
+      "Warns about changing addresses on an interface used for an active connection"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "ip addr add 192.168.10.10/24 dev eth0",
+        "ip addr show eth0",
+        "temporary configuration explanation"
+      ],
+      "must_not": [
+        "claiming that the configuration persists after reboot"
+      ]
+    }
+  },
+  {
+    "id": "NET-014",
+    "category": "configuration",
+    "input": "How do I check the ARP table on my Ubuntu server?",
+    "expected_behavior": [
+      "Uses ip neigh show",
+      "Explains that the neighbor table contains IP-to-link-layer address mappings",
+      "Identifies MAC addresses and neighbor states",
+      "Distinguishes neighbor entries from routing table entries"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "ip neigh show",
+        "IP-to-MAC mapping explanation"
+      ],
+      "must_not": [
+        "confusing the ARP table with the routing table"
+      ]
+    }
+  },
+  {
+    "id": "NET-015",
+    "category": "configuration",
+    "input": "How can I check whether Server B is reachable from Server A?",
+    "expected_behavior": [
+      "Recommends using ping with Server B's IP address",
+      "Explains how to interpret successful replies and packet loss",
+      "Mentions that ping failure does not always prove the server is offline",
+      "Suggests additional inspection if ping fails"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "ping command",
+        "interpretation of ping results"
+      ],
+      "must_not": [
+        "claiming that failed ping conclusively proves the server is offline"
+      ]
+    }
+  },
+  {
+    "id": "NET-016",
+    "category": "bridge",
+    "input": "How do I find out which interfaces are attached to a bridge and their states?",
+    "expected_behavior": [
+      "Uses bridge link show",
+      "Identifies attached interfaces",
+      "Reports interface states and relevant flags",
+      "Explains how the interfaces relate to the bridge"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "bridge link show or equivalent",
+        "interface names",
+        "interface states"
+      ],
+      "must_not": [
+        "invented interface states or bridge membership"
+      ]
+    }
+  },
+  {
+    "id": "NET-017",
+    "category": "edge_case",
+    "input": "My server cannot connect to the internet. Fix it.",
+    "expected_behavior": [
+      "Recognizes that the problem is ambiguous",
+      "Requests or gathers IP configuration and routing information",
+      "Checks interface states and default gateway configuration",
+      "Separates local network connectivity from internet connectivity",
+      "Avoids making configuration changes without understanding the problem"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "request for diagnostic information or diagnostic commands",
+        "recognition of insufficient information"
+      ],
+      "must_not": [
+        "assuming a specific cause",
+        "making unsupported configuration changes"
+      ]
+    }
+  },
+  {
+    "id": "NET-018",
+    "category": "edge_case",
+    "input": "Why can't Server A communicate with Server B?",
+    "expected_behavior": [
+      "Recognizes that insufficient information is provided",
+      "Requests relevant diagnostic output",
+      "Suggests checking IP addresses, interface states, and bridge membership",
+      "Does not invent a network failure"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "request for diagnostic information",
+        "at least one relevant diagnostic command"
+      ],
+      "must_not": [
+        "unsupported diagnosis",
+        "invented network configuration"
+      ]
+    }
+  },
+  {
+    "id": "NET-019",
+    "category": "edge_case",
+    "input": "My DNS server isn't resolving example.com. Can you troubleshoot it?",
+    "expected_behavior": [
+      "Recognizes that DNS troubleshooting is outside the initial Layer 2 scope",
+      "Explains that DNS resolution involves higher-layer networking",
+      "Does not confuse DNS failure with a Layer 2 failure",
+      "May offer to inspect basic network connectivity as a preliminary step"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "recognition of DNS as outside the initial Layer 2 scope",
+        "clear explanation of the scope limitation"
+      ],
+      "must_not": [
+        "claiming DNS is a Layer 2 protocol",
+        "inventing DNS configuration"
+      ]
+    }
+  },
+  {
+    "id": "NET-020",
+    "category": "edge_case",
+    "input": "Configure my router to forward traffic between two subnets.",
+    "expected_behavior": [
+      "Recognizes that inter-subnet forwarding requires Layer 3 routing",
+      "Explains that this is outside the initial Layer 2 scope",
+      "Does not attempt to configure routing without the necessary network information",
+      "Identifies that a router or Layer 3 forwarding device is needed"
+    ],
+    "success_criteria": {
+      "must_include": [
+        "recognition of Layer 3 routing",
+        "scope limitation explanation"
+      ],
+      "must_not": [
+        "claiming a Layer 2 bridge alone performs inter-subnet routing",
+        "inventing subnet or gateway configurations"
+      ]
+    }
+  }
+]
