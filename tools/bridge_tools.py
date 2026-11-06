@@ -18,26 +18,38 @@ def create_bridge_tools(ssh_manager):
             A list of dictionaries. Each dictionary represents
             one network interface and contains:
 
-            - ifname (str): Interface name, such as eth0, lo, or br0.
+            - intrface (str): Interface name, such as eth0, lo, or br0.
             - operstate (str): Operational state, such as UP,
               DOWN, or UNKNOWN.
-            - flags (list[str]): Interface flags, such as UP,
+            - state (str): Interface flags, such as UP,
               LOWER_UP, BROADCAST, or LOOPBACK.
             - mtu (int): Maximum transmission unit.
             - address (str): Interface MAC address.
 
         Important:
-            Use 'ifname' for the interface name.
-            Use 'operstate' for the operational state.
+            Use 'interface' for the interface name.
+            Use 'state' for the operational state.
             Do not assume keys named 'interface_name' or
             'operational_state' exist.
         """
         result = ssh_manager.run_command(
             "bridge",
-            "ip -j link show"
+            "ip -j link"
         )
 
-        return json.loads(result["output"])
+        interfaces = json.loads(result["output"])
+
+        selected_interfaces = []
+
+        for interface in interfaces:
+            selected_interfaces.append({
+                "interface": interface.get("ifname"),
+                "state": interface.get("operstate"),
+                "mtu": interface.get("mtu"),
+                "mac": interface.get("address")
+            })            
+
+        return selected_interfaces
 
     @tool
     def get_bridge_ports() -> list:
@@ -72,7 +84,21 @@ def create_bridge_tools(ssh_manager):
             "bridge -j link"
         )
 
-        return json.loads(result["output"])
+        ports = json.loads(result["output"])
+
+        selected_ports = []
+
+        for port in ports:
+            selected_ports.append({
+                "interface": port.get("ifname"),
+                "bridge": port.get("master"),
+                "state": port.get("state"),
+                "flags": port.get("flags"),
+                "priority": port.get("priority"),
+                "cost": port.get("cost")
+            })
+
+        return selected_ports
 
     @tool
     def get_bridge_details() -> list:
