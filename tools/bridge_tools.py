@@ -6,8 +6,11 @@ def create_bridge_tools(ssh_manager):
     @tool
     def get_interfaces() -> str:
         """
-        List all network interfaces on the bridge VM
-        and show their current states.
+        Use this tool when the user asks about network
+        interfaces on the bridge VM.
+
+        Returns a list of network interfaces, their operational
+        states, MAC addresses, and interface flags.
         """
         result = ssh_manager.run_command(
             "bridge",
@@ -19,8 +22,14 @@ def create_bridge_tools(ssh_manager):
     @tool
     def get_bridge_ports() -> str:
         """
-        Identify which network interfaces are connected
-        to Linux bridges.
+        Use this tool when the user asks which interfaces are
+        attached to Linux bridges or which ports belong to a bridge.
+
+        Returns bridge membership information, including interface
+        names, bridge master devices, and port states.
+
+        Use this tool to identify which physical or virtual
+        interfaces are connected to br0.
         """
         result = ssh_manager.run_command(
             "bridge",
@@ -32,7 +41,11 @@ def create_bridge_tools(ssh_manager):
     @tool
     def get_bridge_details() -> str:
         """
-        Display detailed information about Linux bridge devices.
+        Use this tool when the user asks about the configuration
+        or properties of Linux bridge devices.
+
+        Returns detailed bridge device information, including
+        bridge-specific attributes and configuration flags.
         """
         result = ssh_manager.run_command(
             "bridge",
@@ -44,8 +57,11 @@ def create_bridge_tools(ssh_manager):
     @tool
     def get_bridge_fdb() -> str:
         """
-        Display the forwarding database of the Linux bridge.
-        Shows learned MAC addresses and associated ports.
+        Use this tool when the user asks about learned MAC addresses,
+        forwarding decisions, or the Linux bridge forwarding database.
+
+        Returns forwarding database entries containing learned MAC
+        addresses and the associated bridge ports.
         """
         result = ssh_manager.run_command(
             "bridge",
