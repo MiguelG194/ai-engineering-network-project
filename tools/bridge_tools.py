@@ -1,74 +1,150 @@
 from smolagents import tool
+import json
 
 
 def create_bridge_tools(ssh_manager):
 
     @tool
-    def get_interfaces() -> str:
+    def get_interfaces() -> list:
         """
-        Use this tool when the user asks about network
-        interfaces on the bridge VM.
+        List all network interfaces on the bridge VM.
 
-        Returns a list of network interfaces, their operational
-        states, MAC addresses, and interface flags.
+        Use this tool when asked to:
+        - List or inspect network interfaces.
+        - Check whether interfaces are UP or DOWN.
+        - Inspect interface properties such as MAC addresses or MTU.
+
+        Returns:
+            A list of dictionaries. Each dictionary represents
+            one network interface and contains:
+
+            - ifname (str): Interface name, such as eth0, lo, or br0.
+            - operstate (str): Operational state, such as UP,
+              DOWN, or UNKNOWN.
+            - flags (list[str]): Interface flags, such as UP,
+              LOWER_UP, BROADCAST, or LOOPBACK.
+            - mtu (int): Maximum transmission unit.
+            - address (str): Interface MAC address.
+
+        Important:
+            Use 'ifname' for the interface name.
+            Use 'operstate' for the operational state.
+            Do not assume keys named 'interface_name' or
+            'operational_state' exist.
         """
         result = ssh_manager.run_command(
             "bridge",
-            "ip -br link"
+            "ip -j link show"
         )
 
-        return result["output"]
+        return json.loads(result["output"])
 
     @tool
-    def get_bridge_ports() -> str:
+    def get_bridge_ports() -> list:
         """
-        Use this tool when the user asks which interfaces are
-        attached to Linux bridges or which ports belong to a bridge.
+        Inspect interfaces attached to Linux bridges.
 
-        Returns bridge membership information, including interface
-        names, bridge master devices, and port states.
+        Use this tool when asked to:
+        - Identify which interfaces belong to a bridge.
+        - Determine which ports are attached to br0.
+        - Inspect bridge port states.
+        - Determine which bridge device manages an interface.
 
-        Use this tool to identify which physical or virtual
-        interfaces are connected to br0.
+        Returns:
+            A list of dictionaries representing bridge port
+            membership information.
+
+            Common fields include:
+            - ifname (str): Name of the port interface.
+            - master (str): Name of the bridge master device.
+            - state (str): Bridge port state.
+            - flags (list[str]): Interface flags.
+            - priority (int): Bridge port priority.
+            - cost (int): Bridge port path cost.
+
+        Important:
+            This tool reports bridge membership and port
+            configuration, not general interface information.
+            Use get_interfaces() to inspect all interfaces.
         """
         result = ssh_manager.run_command(
             "bridge",
-            "bridge link"
+            "bridge -j link"
         )
 
-        return result["output"]
+        return json.loads(result["output"])
 
     @tool
-    def get_bridge_details() -> str:
+    def get_bridge_details() -> list:
         """
-        Use this tool when the user asks about the configuration
-        or properties of Linux bridge devices.
+        Inspect Linux bridge device configuration.
 
-        Returns detailed bridge device information, including
-        bridge-specific attributes and configuration flags.
+        Use this tool when asked to:
+        - Inspect the configuration of bridge devices.
+        - Identify bridge-specific settings.
+        - Check bridge properties and configuration flags.
+        - Examine STP or other bridge attributes when available.
+
+        Returns:
+            A list of dictionaries describing Linux bridge
+            devices.
+
+            Common fields may include:
+            - ifname (str): Bridge interface name, such as br0.
+            - mtu (int): Maximum transmission unit.
+            - address (str): Bridge MAC address.
+            - linkinfo (dict): Link-specific information.
+            - flags (list[str]): Interface flags.
+
+            Additional bridge-specific attributes may be present
+            depending on the Linux kernel and iproute2 version.
+
+        Important:
+            This tool inspects bridge devices themselves.
+            Use get_bridge_ports() to inspect their attached ports.
         """
         result = ssh_manager.run_command(
             "bridge",
-            "ip -d link show type bridge"
+            "ip -d -j link show type bridge"
         )
 
-        return result["output"]
+        return json.loads(result["output"])
 
     @tool
-    def get_bridge_fdb() -> str:
+    def get_bridge_fdb() -> list:
         """
-        Use this tool when the user asks about learned MAC addresses,
-        forwarding decisions, or the Linux bridge forwarding database.
+        Inspect the Linux bridge Forwarding Database (FDB).
 
-        Returns forwarding database entries containing learned MAC
-        addresses and the associated bridge ports.
+        Use this tool when asked to:
+        - Find learned MAC addresses.
+        - Determine which bridge port a MAC address is associated with.
+        - Investigate MAC address learning.
+        - Inspect forwarding database entries.
+        - Troubleshoot Layer 2 forwarding.
+
+        Returns:
+            A list of dictionaries representing FDB entries.
+
+            Common fields include:
+            - mac (str): Learned MAC address.
+            - dev (str): Bridge port associated with the MAC address.
+            - master (str): Bridge device associated with the entry,
+              when present.
+            - vlan (int): VLAN identifier, when present.
+            - state (str): FDB entry state, when present.
+            - flags (list[str]): FDB entry flags, when present.
+
+        Important:
+            An FDB entry associates a MAC address with a bridge
+            port. It does not necessarily indicate that the
+            associated device is currently reachable.
         """
         result = ssh_manager.run_command(
             "bridge",
-            "bridge fdb show"
+            "bridge -j fdb show"
         )
 
-        return result["output"]
+        return json.loads(result["output"])
 
     return [
         get_interfaces,
