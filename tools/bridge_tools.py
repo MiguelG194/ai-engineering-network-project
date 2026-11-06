@@ -64,11 +64,11 @@ def create_bridge_tools(ssh_manager):
 
         Returns:
             A list of dictionaries representing bridge port
-            membership information.
+            membership information. 
 
             Common fields include:
-            - ifname (str): Name of the port interface.
-            - master (str): Name of the bridge master device.
+            - interface (str): Name of the port interface.
+            - bridge (str): Name of the bridge master device.
             - state (str): Bridge port state.
             - flags (list[str]): Interface flags.
             - priority (int): Bridge port priority.
