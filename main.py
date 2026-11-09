@@ -1,14 +1,13 @@
-from smolagents import CodeAgent
-from smolagents import LiteLLMModel
-import os
-from smolagents import InferenceClientModel
+import time
+import json
+from datetime import datetime
 
 from ssh.vm_config import VMConfig
 from ssh.ssh_manager import SSHManager
 from tools.bridge_tools import create_bridge_tools
 from tools.host_tools import create_host_tools
-from prompts.bridge_prompts import BRIDGE_PROMPTS
-from instructions.main_instruction import SYSTEM_PROMPT
+from models import create_agents
+from prompts.example_prompts import PROMPTS
 
 configs = {
     "bridge": VMConfig(
@@ -19,14 +18,14 @@ configs = {
     ),
     "host-a": VMConfig(
         name="host-a",
-        host="placeholder",
-        username="placeholder",
+        host="192.168.56.105",
+        username="networklab",
         password="12215Abc*"
     ),
     "host-b": VMConfig(
         name="host-b",
-        host="placeholder",
-        username="placeholder",
+        host="192.168.56.103",
+        username="miguel",
         password="12215Abc*"
     )
 }
@@ -34,47 +33,83 @@ configs = {
 ssh_manager = SSHManager(configs)
 
 ssh_manager.connect("bridge")
-# ssh_manager.connect("host-a")
-# ssh_manager.connect("host-b")
+ssh_manager.connect("host-a")
+ssh_manager.connect("host-b")
 
 bridge_tools = create_bridge_tools(ssh_manager)
-# host_a_tools = create_host_tools(ssh_manager, "host-a")
-# host_b_tools = create_host_tools(ssh_manager, "host-b")
+host_a_tools = create_host_tools(ssh_manager, "host-a")
+host_b_tools = create_host_tools(ssh_manager, "host-b")
 
-# all_tools = bridge_tools + host_a_tools + host_b_tools
+all_tools = bridge_tools + host_a_tools + host_b_tools
 
-model = LiteLLMModel(
-    model_id="ollama_chat/qwen2.5-coder:3b",
-    api_base="http://localhost:11434",
-    num_ctx=8192,
-    temperature=0.1,
-)
+agents = create_agents(all_tools)
 
-agent = CodeAgent(
-    tools=bridge_tools,
-    model=model,
-    instructions=SYSTEM_PROMPT,
-    max_steps=8,
-    verbosity_level=2
-)
+# model = LiteLLMModel(
+#     model_id="ollama_chat/qwen2.5-coder:3b",
+#     api_base="http://localhost:11434",
+#     num_ctx=8192,
+#     temperature=0.1,
+# )
 
-def run_prompt_tests(agent):
+# agent = CodeAgent(
+#     tools=all_tools,
+#     model=model,
+#     instructions=SYSTEM_PROMPT,
+#     max_steps=8,
+#     verbosity_level=2
+# )
 
-    for index, prompt in enumerate(BRIDGE_PROMPTS, start=1):
+def run_prompt_tests(agents):
 
-        print("\n" + "=" * 70)
-        print(f"TEST {index}/{len(BRIDGE_PROMPTS)}")
-        print(f"PROMPT: {prompt}")
-        print("=" * 70)
+    results = []
 
-        try:
-            result = agent.run(prompt)
-            print("\nRESULT:")
-            print(result)
+    try:
+        for category, prompts in PROMPTS.items():
 
-        except Exception as e:
-            print(f"\nERROR: {e}")
+            for i, prompt in enumerate(prompts, start=1):
 
-    ssh_manager.disconnect_all()
+                for agent_name, agent in agents.items():
 
-run_prompt_tests(agent)
+                    print(f"\n[{category}] Test {i} - {agent_name}")
+                    print(f"INPUT: {prompt}")
+
+                    start = time.perf_counter()
+
+                    try:
+                        answer = agent.run(prompt)
+                        answer = str(answer)
+
+                    except Exception as e:
+                        answer = f"ERROR: {e}"
+
+                    elapsed = time.perf_counter() - start
+
+                    print(f"OUTPUT: {answer}")
+                    print(f"TIME: {elapsed:.2f} seconds")
+
+                    results.append({
+                        "agent": agent_name,
+                        "category": category,
+                        "test": i,
+                        "input": prompt,
+                        "output": answer,
+                        "time_seconds": round(elapsed, 3)
+                    })
+
+    finally:
+        ssh_manager.disconnect_all()
+
+    output = {
+        "date": datetime.now().isoformat(),
+        "total_tests": len(results),
+        "agents": list(agents.keys()),
+        "results": results
+    }
+
+    with open("new_test_results.json", "w", encoding="utf-8") as f:
+        json.dump(output, f, indent=4, ensure_ascii=False)
+
+    print("\nResults saved to test_results.json")
+
+
+run_prompt_tests(agents)

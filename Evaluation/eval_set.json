@@ -1,0 +1,126 @@
+{
+  "bridge": [
+    {
+      "prompt": "List all network interfaces on the bridge VM.",
+      "task": "Inspect the network interfaces configured on the bridge VM.",
+      "expected_outcome": "Lists all network interfaces and provides their names and current states."
+    },
+    {
+      "prompt": "Which network interfaces are currently operational?",
+      "task": "Determine which network interfaces on the bridge VM are operational.",
+      "expected_outcome": "Identifies interfaces that are UP and distinguishes them from interfaces that are DOWN."
+    },
+    {
+      "prompt": "Which interfaces are attached to a Linux bridge?",
+      "task": "Identify network interfaces that are members of a Linux bridge.",
+      "expected_outcome": "Lists the interfaces attached to each Linux bridge and identifies their associated bridge."
+    },
+    {
+      "prompt": "Which Linux bridges are configured on this VM?",
+      "task": "Inspect the Linux bridge configuration on the bridge VM.",
+      "expected_outcome": "Identifies all configured Linux bridges, including br0 if present."
+    },
+    {
+      "prompt": "What interfaces are members of br0?",
+      "task": "Inspect the port membership of the br0 Linux bridge.",
+      "expected_outcome": "Lists all interfaces attached to br0 and identifies whether expected interfaces are missing."
+    },
+    {
+      "prompt": "Is Spanning Tree Protocol enabled on the bridge?",
+      "task": "Inspect the Spanning Tree Protocol configuration of br0.",
+      "expected_outcome": "Reports whether STP is enabled or disabled and identifies the configured state accurately."
+    },
+    {
+      "prompt": "Is VLAN filtering enabled?",
+      "task": "Inspect VLAN filtering configuration on br0.",
+      "expected_outcome": "Reports whether VLAN filtering is enabled or disabled."
+    },
+    {
+      "prompt": "What is the purpose of br0 on this VM?",
+      "task": "Analyze the bridge configuration to determine the role of br0.",
+      "expected_outcome": "Explains that br0 connects its member interfaces at Layer 2, allowing connected network segments to communicate through the bridge."
+    },
+    {
+      "prompt": "How many physical interfaces are connected to br0?",
+      "task": "Determine the number of interfaces attached to br0.",
+      "expected_outcome": "Provides the number of attached interfaces and identifies them by name."
+    },
+    {
+      "prompt": "Does the current bridge configuration appear to be functioning correctly?",
+      "task": "Evaluate the overall health and configuration of the Linux bridge.",
+      "expected_outcome": "Uses available interface and bridge information to determine whether the bridge appears correctly configured and operational. Identifies any detected problems and explains their potential impact."
+    }
+  ],
+  "host": [
+    {
+      "prompt": "List all network interfaces on Host A.",
+      "task": "Inspect the network interfaces configured on Host A.",
+      "expected_outcome": "Lists all network interfaces and provides their names and current states."
+    },
+    {
+      "prompt": "Which network interfaces on Host A are currently operational?",
+      "task": "Determine which network interfaces on Host A are operational.",
+      "expected_outcome": "Identifies interfaces that are UP and distinguishes them from interfaces that are DOWN."
+    },
+    {
+      "prompt": "Are there any network interfaces on Host B that are DOWN?",
+      "task": "Check Host B for network interfaces that are not operational.",
+      "expected_outcome": "Identifies any interfaces in the DOWN state or explicitly reports that all relevant interfaces are operational."
+    },
+    {
+      "prompt": "What IPv4 addresses are assigned to Host A?",
+      "task": "Inspect the IPv4 address configuration of Host A.",
+      "expected_outcome": "Lists the IPv4 addresses assigned to each network interface on Host A."
+    },
+    {
+      "prompt": "What IPv4 addresses are assigned to Host B?",
+      "task": "Inspect the IPv4 address configuration of Host B.",
+      "expected_outcome": "Lists the IPv4 addresses assigned to each network interface on Host B."
+    },
+    {
+      "prompt": "Show the IPv4 routing table on Host A.",
+      "task": "Inspect the IPv4 routing table configured on Host A.",
+      "expected_outcome": "Displays the IPv4 routes, including destination networks, gateways, and associated interfaces."
+    },
+    {
+      "prompt": "What is the default gateway configured on Host A?",
+      "task": "Determine the default gateway configured on Host A.",
+      "expected_outcome": "Identifies the default gateway from the IPv4 routing table or reports that no default gateway is configured."
+    },
+    {
+      "prompt": "Which network interface does Host B use for its default route?",
+      "task": "Determine which network interface Host B uses to reach destinations outside its directly connected networks.",
+      "expected_outcome": "Identifies the interface associated with the default route and provides the corresponding gateway when available."
+    },
+    {
+      "prompt": "What neighboring devices are listed in Host A's neighbor table?",
+      "task": "Inspect the neighbor table on Host A.",
+      "expected_outcome": "Lists discovered neighboring devices, including their IP addresses, link-layer addresses, associated interfaces, and neighbor states when available."
+    },
+    {
+      "prompt": "Does Host B have an ARP entry for Host A?",
+      "task": "Check Host B's neighbor table for an entry corresponding to Host A.",
+      "expected_outcome": "Determines whether Host A has an ARP/neighbor entry on Host B and reports its associated MAC address, interface, and state when available."
+    },
+    {
+      "prompt": "Are there any packet errors or dropped packets on Host A?",
+      "task": "Inspect network interface statistics on Host A for packet errors and drops.",
+      "expected_outcome": "Identifies interfaces with recorded RX or TX errors or dropped packets and reports the relevant counters. Explicitly reports when no errors or drops are recorded."
+    },
+    {
+      "prompt": "Which interfaces on Host B have recorded packet errors or drops?",
+      "task": "Examine Host B's network interface statistics for packet errors and drops.",
+      "expected_outcome": "Identifies interfaces with nonzero RX or TX error and drop counters, including the relevant counter values."
+    },
+    {
+      "prompt": "Can Host A successfully ping Host B?",
+      "task": "Test network connectivity from Host A to Host B.",
+      "expected_outcome": "Performs a connectivity test and reports whether Host B is reachable from Host A, including relevant ping results such as packet loss and response time."
+    },
+    {
+      "prompt": "Can Host B successfully ping Host A?",
+      "task": "Test network connectivity from Host B to Host A.",
+      "expected_outcome": "Performs a connectivity test and reports whether Host A is reachable from Host B, including relevant ping results such as packet loss and response time."
+    }
+  ]
+}
