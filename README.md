@@ -33,16 +33,22 @@ git clone <repository-url>
 cd <repository-name>
 ```
 ## Create and activate a virtual environment:
+```bash
 python -m venv .venv
 Windows:
 .venv\Scripts\activate
+```
 ## Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 ## Configuration
 Configure the SSH connection information for the Bridge, Host A, and Host B.
 Configure your LLM provider and model using the project's configuration settings.
 If using Google AI Studio, provide your API key through an environment variable. If using Ollama, make sure the Ollama service is running and the selected model is installed.
 ## Running the Evaluation
+```bash
 python <evaluation-script>.py
+```
 The evaluation script runs the evaluation dataset against the selected model and reports the results.
 
